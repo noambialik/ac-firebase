@@ -19,7 +19,12 @@ app.get('/hello', (request,response) => {
 });
 
 app.post('/submitForm', (request,response) => {
-    admin.initializeApp(functions.config().firebase);
+    try {
+        admin.initializeApp(functions.config().firebase);
+    }catch(e) {
+        console.log("app is already initialaized");
+        
+    }
     const firestore = new Firestore();
     const settings = { timestampsInSnapshots: true };
     firestore.settings(settings);
