@@ -30,19 +30,21 @@ app.post('/submitForm', (request,response) => {
     firestore.settings(settings);
     const db = admin.firestore();
 
-    //test
-    // const googleStorage = require('@google-cloud/storage')();
-    // const storage = googleStorage.bucket('gs://home_ac_data');
     const tempFilePath = path.join(os.tmpdir(), "output.csv");
     let start = request.body.start;
     let end = request.body.end;
     let j = {};
     let csv = ""
+    let pods = [];
 
-    db.collection('AcStats').get().then( (q) => {
+    db.collection('test').where("time",">=",start).where("time","<=",end).get().then( (q) => {
         q.forEach(doc => {
             // json[doc.id.toDate()] = doc.data;
-            csv += doc.id + ',' +doc.data + '\n';
+            if (!doc.location in pods) {
+                csv = doc.location + ',' + csv;
+                pods.push(doc.location);
+            }
+            csv += '\n' + doc.time + ',' +doc.temp;
         });
 
         fs.outputFile(tempFilePath,csv)
@@ -50,11 +52,9 @@ app.post('/submitForm', (request,response) => {
             console.log(os.tmpdir());
             //response.status(200).download(tempFilePath);
             response.status(200).send(csv);
-            return 0;
         }).catch(e => {
             throw e;
         });
-        return 0;
     }).catch(e => {
         throw e;
     });
@@ -64,4 +64,3 @@ app.get('/submitForm', (request,response) => {
     response.status(200).send("found ya");
 });
 exports.main = functions.https.onRequest(app);
-
