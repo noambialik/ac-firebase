@@ -12,7 +12,8 @@
   "dependencies": {
     "express": "^4.16.3",
     "firebase-admin": "~6.0.0",
-    "firebase-functions": "^2.0.3"
+    "firebase-functions": "^2.0.3",
+    "serve-favicon": "*"
   },
   "devDependencies": {
     "eslint": "^4.12.0",

@@ -7,7 +7,10 @@ const os = require('os');
 
 const express = require('express');
 const app = express();
+const favicon = require('serve-favicon');
 app.use(express.static('../public'));
+// app.use(favicon('../public/icon.ico'));
+app.use('/icon.ico', express.static('../public/icon.ico'));
 
 app.post('/submitForm', (request,response) => {
     try {
@@ -21,32 +24,44 @@ app.post('/submitForm', (request,response) => {
     firestore.settings(settings);
     const db = admin.firestore();
 
-
     const tempFilePath = path.join(os.tmpdir(), "output.csv");
     let start = request.body.start;
     let end = request.body.end;
     start = new Date(start).valueOf();
     end = new Date(end).valueOf();
     let j = {};
-    let csv = ""
+    let csv = " ,"
     let pods = [];
-    db.collection('test').where("epoch",">=",start).where("epoch","<=",end).get().then( (q) => {
-    //db.collection('test').where("location","==","Home").get().then( (q) => {
+    
+    db.collection('AcStats').where("epoch",">=",start).where("epoch","<=",end).get().then( (q) => {
+    // db.collection('AcStats').get().then( (q) => {
+        console.log("0");
+        
         q.forEach(doc => {
             // json[doc.id.toDate()] = doc.data;
+            console.log("1");
+            
+            if (doc.exists) {
+                console.log("it does exists after all");
+            } else{
+                console.log("it does not exist :(((");
+                
+            }
             let data = doc.data();
+            console.log(data);
+            
             if (!( isIn(data.location,pods) )) {
                 csv = data.location + ',' + csv;
                 pods.push(data.location);
             }
             csv += '\n' + data.time + ',' +data.temp + ',';
         });
-
+        console.log("2");
+        
         fs.outputFile(tempFilePath,csv)
         .then( () => {
             console.log(os.tmpdir());
             response.status(200).download(tempFilePath);
-            // response.status(200).send(csv);
         }).catch(e => {
             throw e;
         });
@@ -62,4 +77,3 @@ function isIn(pod,pods) {
   }
 
 exports.main = functions.https.onRequest(app);
-
