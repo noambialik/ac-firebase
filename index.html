@@ -17,21 +17,35 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
     <form method="POST" action="submitForm/">
-      <div class="col-lg-4 col-lg-offset-4">
+      <div class="col-lg-4 col-lg-offset-2">
           <h1 class="text-justify text-center"> Plot</h1>
                   <legend class="text-justify text-center">Choose dates</legend>
                   <div>
                       <label for="start" class="text-justify">Start</label>
-                      <input type="date" id="start" name="start" value="2018-07-22">
+                      <input type="date" id="start" name="start">
                   </div>
               
                   <div>
                       <label for="end" class="text-justify">End</label>
-                      <input type="date" id="end" name="end" value="2018-09-29">
+                      <input type="date" id="end" name="end">
                   </div>
               <button class="btn btn-primary" type="submit">Download File</button>
       </div>
     </form>
+
+    <script>
+      window.onload = function() {
+        let yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        document.getElementById("start").value = yesterday.toISOString().split('T')[0];
+        document.getElementById("end").value = yesterday.toISOString().split('T')[0];
+
+      }
+
+      function f() {
+        return "2018-09-29";
+      }
+    </script>
 </body>
 </html>
 

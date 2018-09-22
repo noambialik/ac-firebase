@@ -25,10 +25,13 @@ app.post('/submitForm', (request,response) => {
     const db = admin.firestore();
 
     const tempFilePath = path.join(os.tmpdir(), "output.csv");
-    let start = request.body.start;
-    let end = request.body.end;
-    start = new Date(start).valueOf();
-    end = new Date(end).valueOf();
+    let startReq = request.body.start;
+    let endReq = request.body.end;
+    start = new Date(startReq).valueOf();
+    end = new Date(endReq)//.valueOf();
+    end.setDate(end.getDate() + 1);
+    console.log(end);
+    end = end.valueOf();
     let j = {};
     let csv = " ,"
     let pods = [];
@@ -41,12 +44,6 @@ app.post('/submitForm', (request,response) => {
             // json[doc.id.toDate()] = doc.data;
             console.log("1");
             
-            if (doc.exists) {
-                console.log("it does exists after all");
-            } else{
-                console.log("it does not exist :(((");
-                
-            }
             let data = doc.data();
             console.log(data);
             
@@ -54,14 +51,20 @@ app.post('/submitForm', (request,response) => {
                 csv = data.location + ',' + csv;
                 pods.push(data.location);
             }
-            csv += '\n' + data.time + ',' +data.temp + ',';
+            csv += '\n' + formatTime(data.time) + ',' +data.temp + ',';
         });
         console.log("2");
         
         fs.outputFile(tempFilePath,csv)
         .then( () => {
-            console.log(os.tmpdir());
-            response.status(200).download(tempFilePath);
+            console.log('created temp file at' + os.tmpdir());
+            if (csv == " ,") {
+                response.status(404).send('no such data')
+            } else {
+                response.status(200).download(tempFilePath);
+                //response.send('hi');
+            }
+            
         }).catch(e => {
             throw e;
         });
@@ -74,6 +77,16 @@ function isIn(pod,pods) {
     return pods.some(function(el) {
       return el === pod;
     }); 
+  }
+
+  function formatTime(d) {
+      let dateType = new Date(d);
+      let iso = dateType.toISOString();
+      let a = iso.split('T');
+      let date = a[0];
+      let time = a[1];
+      let dateArray = date.split('-');
+      return dateArray[1] + '-' + dateArray[2] + '-' + dateArray[0] + ' ' + time.substr(0,4);
   }
 
 exports.main = functions.https.onRequest(app);
